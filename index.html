@@ -1,0 +1,128 @@
+<!DOCTYPE html> 	
+<html>
+	<head>
+		<title>Typing race</title>
+		<style type="text/css">
+			body {
+				text-align:center;
+			}
+			.words { display:inline}
+			textarea {resize: none}
+			form {
+				 position: relative;
+				 width: 400px;
+				 margin: 0 auto;
+				 text-align: left;
+			}
+			input{ display: block }			
+			#word{ background-color: lightgreen }
+			#retry { display: none}
+			#textpanel {min-height: 200px}
+		</style>
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"> </script>
+		<script type="text/javascript">
+			var words, wordsCount, startTime, currentWordIndex;			
+		
+			function isLastWord(){
+				return currentWordIndex == wordsCount-1;
+			}
+			
+			function prepareText(txt){
+				//Removing duplicate spaces.
+				txt = txt.replace(/ +(?= )/g,'');
+			}
+			
+			function start(){
+					var textInput = $("#text");
+					text = textInput.val();
+					textInput.prop("disabled", true);
+					words = text.split(' ')
+					wordsCount = words.length;
+					startTime = null;
+					currentWordIndex = 0;
+					$("#word").prop("disabled", false);
+					$("#text").hide();
+					var html="";
+					for (i in words){
+						html+="<div id=\"" + getWordDivId(i) +"\" class=\"words\">" + words[i] +" </div> ";
+					}
+					$("#textToType").html(html);
+					
+					highlightWord(0);
+			}			
+			
+			function getWordDivId(wordNumber){
+				return "word" + wordNumber;
+			}
+			
+			function highlightWord (wordNumber){
+				if (wordNumber !==0)
+					$("#" + getWordDivId(wordNumber -1)).css("background-color", "white");
+					
+				$("#" + getWordDivId(wordNumber)).css("background-color", "lightgrey");
+			}
+						
+			$(document).ready(function(){
+				var wordTextBox = $("#word");
+				$("#word").prop("disabled", true);
+				
+				wordTextBox.keyup(function() {
+					if (startTime == null)
+						startTime = new Date();
+					
+					var currentWord = words[currentWordIndex];
+					
+					if (!isLastWord())
+						currentWord += " ";
+				
+					var val = wordTextBox.val();
+					if ((currentWord).lastIndexOf(val, 0) === 0){
+						wordTextBox.css("background-color", "lightgreen")
+						if (currentWord == val){
+							wordTextBox.val("");
+							
+							if (isLastWord()){
+								var endTime = new Date();
+								var differenceMinutes = (endTime.getTime() - startTime.getTime())/60000;
+								var cpm = text.length/differenceMinutes
+								$("#result").text("Your result is " + cpm.toFixed(0) + " CPM.");
+								$("#retry").show();
+								$("#word").prop("disabled", true);
+							}
+							else{
+								highlightWord(++currentWordIndex)
+							}
+						}
+					}
+					else {
+						wordTextBox.css("background-color", "red")
+					}
+				});
+				
+				$("#start").click(function(){
+					start();
+					$(this).css("visibility", "hidden");
+				});
+				
+				$("#retry").click(function(){
+					start();
+					$("#result").text(" ");
+					$(this).hide();
+				});
+			});
+		</script>
+	</head>
+
+	<body>
+		<form id="form">
+			<div id="textpanel">
+				<textarea id="text" rows=10 cols=70>You can put any text here. Or just try typing these words.</textarea>
+				<div id="textToType"></div>
+			</div>
+			<input id="start" type="button" value="Start" />
+			Type here: <input type="text" id="word"/>
+			<div id="result" ></div>
+			<input id="retry" type="button" value="Retry" />
+		</form>
+	</body>
+</html>
