@@ -66,7 +66,7 @@
 				var wordTextBox = $("#word");
 				$("#word").prop("disabled", true);
 				
-				wordTextBox.keyup(function() {
+				wordTextBox.keydown(function() {
 					if (startTime == null)
 						startTime = new Date();
 					
